@@ -467,6 +467,7 @@ sptr< Dictionary::DataRequest > ArticleNetworkAccessManager::getResource(
         {
             if( url.scheme() == "gico" )
             {
+                contentType = "image/png";
                 QByteArray bytes;
                 QBuffer buffer(&bytes);
                 buffer.open(QIODevice::WriteOnly);
