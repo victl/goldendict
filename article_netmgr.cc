@@ -16,6 +16,7 @@
 
 using std::string;
 
+#ifdef USE_QTWEBKIT
 #if QT_VERSION >= 0x050300 // Qt 5.3+
 
   // SecurityWhiteList
@@ -208,7 +209,8 @@ using std::string;
     emit finished();
   }
 
-#endif
+#endif // QT_VERSION
+#endif // USE_QTWEBKIT
 
 namespace
 {
@@ -263,6 +265,7 @@ QNetworkReply * ArticleNetworkAccessManager::createRequest( Operation op,
       return QNetworkAccessManager::createRequest( op, newReq, outgoingData );
     }
 
+#ifdef USE_QTWEBKIT
 #if QT_VERSION >= 0x050300 // Qt 5.3+
     // Workaround of same-origin policy
     if( ( req.url().scheme().startsWith( "http" ) || req.url().scheme() == "ftp" )
@@ -295,7 +298,8 @@ QNetworkReply * ArticleNetworkAccessManager::createRequest( Operation op,
         }
       }
     }
-#endif
+#endif // QT_VERSION
+#endif // USE_QTWEBKIT
 
     QString contentType;
 
@@ -328,6 +332,10 @@ QNetworkReply * ArticleNetworkAccessManager::createRequest( Operation op,
     }
   }
 
+  // TODO (Qt WebEngine): obtain a dictionary that contains file:// links for testing and
+  // make this code work in the Qt WebEngine version. Currently it does not work because
+  // GoldenDict does not install an URL scheme handler for the standard "file" scheme.
+  // This looks like an adjustment of a relative path to a dictionary in the portable version.
   if( req.url().scheme() == "file" )
   {
     // Check file presence and adjust path if necessary
@@ -368,7 +376,7 @@ QNetworkReply * ArticleNetworkAccessManager::createRequest( Operation op,
 #endif
   }
 
-#if QT_VERSION >= 0x050300 // Qt 5.3+
+#if defined( USE_QTWEBKIT ) && QT_VERSION >= 0x050300 // Qt 5.3+
   return op == QNetworkAccessManager::GetOperation
          || op == QNetworkAccessManager::HeadOperation ? new AllowFrameReply( reply ) : reply;
 #else
