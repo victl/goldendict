@@ -1681,6 +1681,9 @@ ArticleView * MainWindow::createNewTab( bool switchToIt,
   connect( view, SIGNAL( iconChanged( ArticleView *, QIcon const & ) ),
            this, SLOT( iconChanged( ArticleView *, QIcon const & ) ) );
 
+  connect( view, SIGNAL( canGoBackForwardChanged( ArticleView * ) ),
+           this, SLOT( canGoBackForwardChanged( ArticleView * ) ) );
+
   connect( view, SIGNAL( pageUnloaded( ArticleView * ) ),
            this, SLOT( pageUnloaded( ArticleView * ) ) );
 
@@ -1930,6 +1933,13 @@ void MainWindow::updateWindowTitle()
   }
 }
 
+void MainWindow::canGoBackForwardChanged( ArticleView * view )
+{
+  if( view == getCurrentArticleView() )
+    updateBackForwardButtons( view );
+  // else: ignore this change in a non-active tab
+}
+
 void MainWindow::pageUnloaded( ArticleView * view )
 {
   if( view != getCurrentArticleView() )
@@ -1954,8 +1964,6 @@ void MainWindow::pageLoaded( ArticleView * view )
 {
   if( view != getCurrentArticleView() )
     return; // It was background action
-
-  updateBackForwardButtons();
 
   if ( cfg.preferences.pronounceOnLoadMain )
     pronounce( view );
@@ -2088,10 +2096,16 @@ void MainWindow::updateBackForwardButtons()
   ArticleView *view = getCurrentArticleView();
 
   if ( view )
-  {
-    navBack->setEnabled(view->canGoBack());
-    navForward->setEnabled(view->canGoForward());
-  }
+    updateBackForwardButtons( view );
+}
+
+void MainWindow::updateBackForwardButtons( ArticleView * view )
+{
+  Q_ASSERT( view );
+  Q_ASSERT( view == getCurrentArticleView() );
+
+  navBack->setEnabled( view->canGoBack() );
+  navForward->setEnabled( view->canGoForward() );
 }
 
 void MainWindow::updatePronounceAvailability()

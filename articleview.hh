@@ -225,6 +225,9 @@ signals:
 
   void titleChanged( ArticleView *, QString const & title );
 
+  /// Is emitted when the return value of canGoBack() or canGoForward() may have changed.
+  void canGoBackForwardChanged( ArticleView * );
+
   void pageUnloaded( ArticleView * );
   void articleLoaded( ArticleView *, QString const & id, bool isActive );
   void pageLoaded( ArticleView * );
@@ -358,6 +361,8 @@ private:
   void onJsArticleLoaded( QString const & id, QString const & audioLink, bool isActive );
 
   void onJsActiveArticleChanged( QString const & id );
+
+  void onJsLocationHashChanged();
 
   /// </JavaScript interface>
 

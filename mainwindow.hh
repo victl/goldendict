@@ -221,6 +221,7 @@ private:
   void updateFoundInDictsList();
 
   void updateBackForwardButtons();
+  void updateBackForwardButtons( ArticleView * view );
 
   void updateWindowTitle();
 
@@ -350,6 +351,8 @@ private slots:
   void titleChanged( ArticleView *, QString const & );
   /// ArticleView's icon has changed
   void iconChanged( ArticleView *, QIcon const & );
+
+  void canGoBackForwardChanged( ArticleView * );
 
   void pageUnloaded( ArticleView * );
   void articleLoaded( ArticleView *, QString const & id, bool isActive );
