@@ -2,23 +2,21 @@
  * Part of GoldenDict. Licensed under GPLv3 or later, see the LICENSE file */
 
 #include "articlewebview.hh"
-#include <QMouseEvent>
-#include <QApplication>
 
 #ifdef USE_QTWEBKIT
+
+#include <QMouseEvent>
+#include <QApplication>
 #include "articleinspector.hh"
 #include <QWebFrame>
-#endif
 
 #ifdef Q_OS_WIN32
 #include <qt_windows.h>
 #endif
 
 ArticleWebView::ArticleWebView( QWidget *parent ):
-  WebView( parent ),
-#ifdef USE_QTWEBKIT
+  QWebView( parent ),
   inspector( NULL ),
-#endif
   midButtonPressed( false ),
   selectionBySingleClick( false ),
   showInspectorDirectly( true )
@@ -27,10 +25,8 @@ ArticleWebView::ArticleWebView( QWidget *parent ):
 
 ArticleWebView::~ArticleWebView()
 {
-#ifdef USE_QTWEBKIT
   if ( inspector )
     inspector->deleteLater();
-#endif
 }
 
 void ArticleWebView::setUp( Config::Class * cfg )
@@ -38,7 +34,6 @@ void ArticleWebView::setUp( Config::Class * cfg )
   this->cfg = cfg;
 }
 
-#ifdef USE_QTWEBKIT
 void ArticleWebView::triggerPageAction( QWebPage::WebAction action, bool checked )
 {
   if ( action == QWebPage::InspectElement )
@@ -84,14 +79,13 @@ bool ArticleWebView::event( QEvent * event )
 
   return QWebView::event( event );
 }
-#endif // USE_QTWEBKIT
 
 void ArticleWebView::mousePressEvent( QMouseEvent * event )
 {
   if ( event->buttons() & Qt::MidButton )
     midButtonPressed = true;
 
-  WebView::mousePressEvent( event );
+  QWebView::mousePressEvent( event );
 
   if ( selectionBySingleClick && ( event->buttons() & Qt::LeftButton ) )
   {
@@ -103,24 +97,24 @@ void ArticleWebView::mousePressEvent( QMouseEvent * event )
 
 void ArticleWebView::mouseReleaseEvent( QMouseEvent * event )
 {
-  WebView::mouseReleaseEvent( event );
+  QWebView::mouseReleaseEvent( event );
 
+  // QWebPage::linkClicked() signal is emitted during the above call to QWebView::mouseReleaseEvent(),
+  // so midButtonPressed has been used already and can be unset now.
   if( midButtonPressed && !( event->buttons() & Qt::MidButton ) )
     midButtonPressed = false;
 }
 
 void ArticleWebView::mouseDoubleClickEvent( QMouseEvent * event )
 {
-  WebView::mouseDoubleClickEvent( event );
+  QWebView::mouseDoubleClickEvent( event );
 
-  // TODO (Qt WebEngine): port the scrollbar checks if they are useful in the Qt WebEngine version.
-#ifdef USE_QTWEBKIT
   int scrollBarWidth = page()->mainFrame()->scrollBarGeometry( Qt::Vertical ).width();
   int scrollBarHeight = page()->mainFrame()->scrollBarGeometry( Qt::Horizontal ).height();
+
   // emit the signal only if we are not double-clicking on scrollbars
   if ( ( event->x() < width() - scrollBarWidth ) &&
        ( event->y() < height() - scrollBarHeight ) )
-#endif
   {
     emit doubleClicked( event->pos() );
   }
@@ -128,8 +122,6 @@ void ArticleWebView::mouseDoubleClickEvent( QMouseEvent * event )
 }
 
 // TODO (Qt WebEngine): port if this code is useful in the Qt WebEngine version.
-#ifdef USE_QTWEBKIT
-
 void ArticleWebView::focusInEvent( QFocusEvent * event )
 {
   QWebView::focusInEvent( event );
@@ -147,6 +139,7 @@ void ArticleWebView::focusInEvent( QFocusEvent * event )
   }
 }
 
+// TODO (Qt WebEngine): port if this code is useful in the Qt WebEngine version.
 void ArticleWebView::wheelEvent( QWheelEvent *ev )
 {
 #ifdef Q_OS_WIN32
@@ -179,6 +172,44 @@ void ArticleWebView::wheelEvent( QWheelEvent *ev )
      QWebView::wheelEvent( ev );
   }
 
+}
+
+#else // USE_QTWEBKIT
+
+#include <QChildEvent>
+
+void ArticleWebView::setEventFilter( QObject * filterObject )
+{
+  eventFilterObject = filterObject;
+}
+
+bool ArticleWebView::isWatched( QObject * object ) const
+{
+  return object->parent() == this && object->isWidgetType();
+}
+
+void ArticleWebView::childEvent( QChildEvent * event )
+{
+  auto * const child = event->child();
+  if( child->isWidgetType() )
+  {
+    // Empirical observation: in Qt 5.15 QWebEngineView has a single widget child, which is added
+    // soon after construction and is never removed. Remove the event filter from a removed child
+    // anyway in case this occurs under some circumstances or in a future Qt version.
+    switch( event->type() )
+    {
+      case QEvent::ChildAdded:
+        child->installEventFilter( eventFilterObject );
+        break;
+      case QEvent::ChildRemoved:
+        child->removeEventFilter( eventFilterObject );
+        break;
+      default:
+        break;
+    }
+  }
+
+  return QWebEngineView::childEvent( event );
 }
 
 #endif // USE_QTWEBKIT
