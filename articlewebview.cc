@@ -103,11 +103,9 @@ void ArticleWebView::mousePressEvent( QMouseEvent * event )
 
 void ArticleWebView::mouseReleaseEvent( QMouseEvent * event )
 {
-  bool noMidButton = !( event->buttons() & Qt::MidButton );
-
   WebView::mouseReleaseEvent( event );
 
-  if ( midButtonPressed & noMidButton )
+  if( midButtonPressed && !( event->buttons() & Qt::MidButton ) )
     midButtonPressed = false;
 }
 
