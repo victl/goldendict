@@ -50,6 +50,8 @@ class QWebEngineProfile;
 using std::string;
 using std::vector;
 
+class ArticleSaveProgressDialog;
+
 class ExpandableToolBar : public QToolBar
 {
   Q_OBJECT
@@ -270,6 +272,9 @@ private:
 
   ArticleView * getCurrentArticleView();
   void ctrlTabPressed();
+
+  void saveArticleAs( ArticleView & view, QString & html, QString const & fileName, bool complete,
+                      QRegExp const & rxName, ArticleSaveProgressDialog * progressDialog );
 
   void fillWordListFromHistory();
 
