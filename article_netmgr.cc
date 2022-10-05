@@ -369,6 +369,8 @@ QNetworkReply * ArticleNetworkAccessManager::createRequest( Operation op,
 
       return QNetworkAccessManager::createRequest( op, newReq, outgoingData );
     }
+
+    return QNetworkAccessManager::createRequest( op, req, outgoingData ); // bypass AllowFrameReply
   }
 
   QNetworkReply *reply = 0;
