@@ -229,6 +229,7 @@ private slots:
 
   void switchExpandOptionalPartsMode();
 
+  void pageLoadingStateChanged( ArticleView *, bool isLoading );
   void updateBackForwardButtons();
 
   void translateInputChanged(QString const & text);

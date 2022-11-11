@@ -233,6 +233,9 @@ private:
   void appendToFoundInDictsList( QString const & id, bool isActive );
   void updateFoundInDictsList();
 
+  void updateIsPageLoading();
+  void setIsPageLoading( bool isLoading );
+
   void updateBackForwardButtons();
   void updateBackForwardButtons( ArticleView * view );
 
@@ -368,6 +371,7 @@ private slots:
   /// ArticleView's icon has changed
   void iconChanged( ArticleView *, QIcon const & );
 
+  void pageLoadingStateChanged( ArticleView *, bool isLoading );
   void canGoBackForwardChanged( ArticleView * );
 
   void pageUnloaded( ArticleView * );
