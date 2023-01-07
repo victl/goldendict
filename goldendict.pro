@@ -103,7 +103,7 @@ win32 {
         # QMAKE_CXXFLAGS_RELEASE += /GL # slows down the linking significantly
         LIBS += -lshell32 -luser32 -lsapi -lole32
         Debug: LIBS+= -lhunspelld
-        Release: LIBS+= -lhunspell
+        Release: LIBS+= -lhunspell-1.7.0
         HUNSPELL_LIB = hunspell
     } else {
         CONFIG(gcc48) {
@@ -120,7 +120,7 @@ win32 {
         !x64:QMAKE_LFLAGS += -Wl,--large-address-aware
 
         isEmpty(HUNSPELL_LIB) {
-          LIBS += -lhunspell-1.6.1
+          LIBS += -lhunspell-1.7.0
         } else {
           LIBS += -l$$HUNSPELL_LIB
         }
@@ -139,10 +139,10 @@ win32 {
         -logg
     !CONFIG( no_ffmpeg_player ) {
         LIBS += -lao \
-            -lswresample-gd \
-            -lavutil-gd \
-            -lavformat-gd \
-            -lavcodec-gd
+            -lswresample \
+            -lavutil \
+            -lavformat \
+            -lavcodec
     }
 
 
@@ -233,23 +233,24 @@ mac {
     # You will need to use Xcode 3 and Qt Carbon SDK
     # if you want the support for PowerPC and/or Mac OS X 10.4
     # CONFIG += x86 x86_64 ppc
-    LIBS = -lz \
+    LIBS = -L/opt/homebrew/lib -L/opt/homebrew/Cellar/qt@5/5.15.8/lib \
+        -lz \
         -lbz2 \
         -liconv \
         -lvorbisfile \
         -lvorbis \
         -logg \
-        -lhunspell-1.6.1 \
+        -lhunspell-1.7.0 \
         -llzo2
+    INCLUDEPATH += /opt/homebrew/include
+    LIBS += -L/opt/homebrew/lib -framework AppKit -framework Carbon
     !CONFIG( no_ffmpeg_player ) {
         LIBS += -lao \
-            -lswresample-gd \
-            -lavutil-gd \
-            -lavformat-gd \
-            -lavcodec-gd
+            -lswresample \
+            -lavutil \
+            -lavformat \
+            -lavcodec
     }
-    INCLUDEPATH = $${PWD}/maclibs/include
-    LIBS += -L$${PWD}/maclibs/lib -framework AppKit -framework Carbon
     OBJECTIVE_SOURCES += lionsupport.mm \
                          machotkeywrapper.mm \
                          macmouseover.mm \
@@ -257,7 +258,6 @@ mac {
     ICON = icons/macicon.icns
     QMAKE_INFO_PLIST = myInfo.plist
     QMAKE_POST_LINK = mkdir -p GoldenDict.app/Contents/Frameworks & \
-                      cp -nR $${PWD}/maclibs/lib/ GoldenDict.app/Contents/Frameworks/ & \
                       mkdir -p GoldenDict.app/Contents/MacOS/locale & \
                       cp -R locale/*.qm GoldenDict.app/Contents/MacOS/locale/ & \
                       mkdir -p GoldenDict.app/Contents/MacOS/help & \
@@ -616,7 +616,7 @@ CONFIG( chinese_conversion_support ) {
     Release: LIBS += -lopencc
   } else {
     mac {
-      LIBS += -lopencc.2
+      LIBS += -lopencc
     } else {
       LIBS += -lopencc
     }

@@ -1,3 +1,25 @@
+# Building GoldenDict on macOS Ventura 13.1 (succeeded on a Macbook Air M2)
+The official `*.dylib` files included in the `maclibs` directory are outdated (for x86), so they've been removed.
+Any dependent libraries are either using the version come with the OS, or installed by homebrew.
+
+The packages install by Homebrew are (may not be complete):
+```
+brew install tiff libao vorbis ffmpeg hunspell xz lzo libogg opencc zstd qt@5
+```
+
+NOTE: The current version of `qt` is Qt6, which I've been unable to compile successfully. So you either not to
+install the `qt` package, but install `qt@5` or do the following:
+```
+brew unlink qt && brew link qt@5
+```
+
+After all the requirements have been met, compile the App by:
+```
+qmake "CONFIG+=use_qtwebengine" "CONFIG+=no_epwing_support"
+make -j8
+```
+If you are luck, a `GoldenDict.app` could be found in the code's root directory. Move it to `/Applications`
+(or by `make install` maybe, haven't tried it).
 ## Introduction
 
 <b>GoldenDict</b> is a feature-rich dictionary lookup program, supporting multiple dictionary formats (StarDict/Babylon/Lingvo/Dictd/AARD/MDict/SDict) and online dictionaries, featuring perfect article rendering with the complete markup, illustrations and other content retained, and allowing you to type in words without any accents or correct case.
